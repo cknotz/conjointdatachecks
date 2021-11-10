@@ -16,7 +16,7 @@ carryTest(data, outcome, attributes, task)
 \item{task}{The task- or contest-ID; should be a factor in the data, entered here as a string.}
 }
 \value{
-A list of class 'carryTest'.
+A list of class 'carryTest'. Can be converted to tidy data.frame with as.data.frame().
 }
 \description{
 \code{carryTest} checks data from conjoint experiments for carryover effects
@@ -27,7 +27,11 @@ interaction terms. A rejected null indicates carryover effects are present in th
 vignette attribute (see also Hainmueller et al. 2014, Political Analysis, p. 22).
 }
 \examples{
-\dontrun{carryTest(data=experimentdata, attributes=c("gender","age","income",
-"education"),outcome="rating",task="taskID")}
+\dontrun{
+carryTest(data=experimentdata,
+attributes=c("gender","age","income","education"),
+outcome="rating",
+task="taskID")
+}
 
 }

@@ -11,10 +11,14 @@
 #' @param outcome The outcome variable, rating or choice, entered as a string.
 #' @param attributes A character vector of vignette attributes/dimensions.
 #' @param task The task- or contest-ID; should be a factor in the data, entered here as a string.
-#' @return A list of class 'carryTest'.
+#' @return A list of class 'carryTest'. Can be converted to tidy data.frame with as.data.frame().
 #' @examples
-#' \dontrun{carryTest(data=experimentdata, attributes=c("gender","age","income",
-#' "education"),outcome="rating",task="taskID")}
+#' \dontrun{
+#' carryTest(data=experimentdata,
+#' attributes=c("gender","age","income","education"),
+#' outcome="rating",
+#' task="taskID")
+#' }
 #'
 #' @importFrom stats as.formula lm model.frame pf resid
 #'

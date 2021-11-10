@@ -28,7 +28,10 @@ is also provided for each attribute combination to indicate the strength of any
 association between the attributes. The output can be labeled.
 }
 \examples{
-\dontrun{dimRandoTest(data=experimentdata,dims=c("age","nationality",
-"gender"),labels=c("Age","Nationality","Gender"))}
+\dontrun{
+dimRandoTest(data=experimentdata,
+dims=c("age","nationality","gender"),
+labels=c("Age","Nationality","Gender"))
+}
 
 }

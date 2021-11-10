@@ -15,8 +15,11 @@
 #' (Important: the order of the labels must correspond to the order of attributes in dims!).
 #' @return A list of class 'dimRandoTest'.
 #' @examples
-#' \dontrun{dimRandoTest(data=experimentdata,dims=c("age","nationality",
-#' "gender"),labels=c("Age","Nationality","Gender"))}
+#' \dontrun{
+#' dimRandoTest(data=experimentdata,
+#' dims=c("age","nationality","gender"),
+#' labels=c("Age","Nationality","Gender"))
+#' }
 #'
 #' @importFrom stats chisq.test
 #'
