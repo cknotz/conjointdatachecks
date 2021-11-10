@@ -15,7 +15,7 @@ dimRandoTest(data, dims, labels = NULL)
 (Important: the order of the labels must correspond to the order of attributes in dims!).}
 }
 \value{
-A list of class 'dimRandoTest'.
+A list of class 'dimRandoTest'. Can be converted to a data.frame with as.data.frame().
 }
 \description{
 \code{dimRandoTest} checks data from conjoint experiments for randomization

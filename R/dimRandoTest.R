@@ -13,7 +13,7 @@
 #' @param dims A character vector of vignette attributes' names in the dataset.
 #' @param labels Optional. A character vector of labels for the vignette attributes
 #' (Important: the order of the labels must correspond to the order of attributes in dims!).
-#' @return A list of class 'dimRandoTest'.
+#' @return A list of class 'dimRandoTest'. Can be converted to a data.frame with as.data.frame().
 #' @examples
 #' \dontrun{
 #' dimRandoTest(data=experimentdata,
