@@ -1,0 +1,16 @@
+Package: conjointdatachecks
+Title: An R Package to Check Data from Conjoint Experiments
+Version: 0.0.1
+Authors@R:
+    person("Carlo Michael", "Knotz", , "carlo.knotz@uis.no", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0003-0042-3065"))
+Description: This package provides two lightweight functions to check data from conjoint survey experiments for quality issues (carryover effects and randomization issues). It complements the cjoint and cregg packages for conjoint analysis.
+License: GPL (>= 3)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2
+Suggests:
+  cregg (>= 0.4.0),
+  cjoint (>= 2.1.0)
+Imports:
+  stats (>= 4.1.1)
