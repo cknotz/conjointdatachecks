@@ -54,5 +54,5 @@ print.dimRandoTest <- function(x,...){
   cat("",sep,"\n")
   prmatrix(frame, collab = collabs, rowlab = rep_len("", nrow(frame)),
            na.print = " ", quote = F)
-  cat(" Numbers in cells are Cramer's V statistics.\n Significance levels: * p<0.1; ** p<0.05; *** p<0.01\n Significance based on chi-squared test.")
+  cat(" Numbers in cells are Cramer's V statistics.\n Significance levels: * p<0.1; ** p<0.05; *** p<0.01\n Significances based on chi-squared tests.")
 }
