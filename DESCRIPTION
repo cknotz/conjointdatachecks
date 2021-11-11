@@ -10,7 +10,10 @@ Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2
 Suggests:
-  cregg (>= 0.4.0),
-  cjoint (>= 2.1.0)
+    cregg (>= 0.4.0),
+    cjoint (>= 2.1.0),
+    knitr,
+    rmarkdown
 Imports:
   stats (>= 4.1.1)
+VignetteBuilder: knitr

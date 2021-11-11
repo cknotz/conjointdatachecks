@@ -14,7 +14,8 @@ dimRandoTest(data, attributes, resvar, vartype)
 \item{resvar}{A respondent-level variable.}
 
 \item{vartype}{The type (measurement level) of the respondent variable.
-("metric" or "categorical")}
+("metric" or "categorical"). If vartype is "categorical", the variable
+needs to be stored as a factor in the dataset.}
 }
 \value{
 A list of class 'dimRandoTest'. Can be converted to a tidy data.frame

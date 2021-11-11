@@ -1,0 +1,128 @@
+---
+title: "conjointdatachecks"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+date: "`r Sys.Date()`"
+author: "Carlo Knotz"
+vignette: >
+  %\VignetteIndexEntry{conjointdatachecks}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## The purpose of this package
+
+Conjoint survey experiments have become a popular tool among political scientists since
+Hainmueller et al. introduced the methodology in their 2014 article in [_Political Analysis_](https://www.cambridge.org/core/journals/political-analysis/article/causal-inference-in-conjoint-analysis-understanding-multidimensional-choices-via-stated-preference-experiments/414DA03BAA2ACE060FFE005F53EFF8C8) 
+and the associated `cjoint` package for `R`.
+
+Thomas Leeper's `cregg` [package](https://cran.r-project.org/web/packages/cregg/vignettes/Introduction.html) then further expanded the toolkit for conjoint analysis, notably by providing
+functions to check the quality of data from conjoint experiments. One data quality problem that can arise are **carryover effects**. These arise when respondents go through several rounds in which they evaluate or choose vignettes, and when their ratings or choices in later rounds are influenced by what they saw in earlier rounds. A second potential problem that can appear are **randomization problems**. These result when the random assignment of vignettes to respondents does not work and, say, male respondents were more likely to see some types of vignettes than female respondents. `cregg` allows users to identify these problems via a graphical inspection of the data.
+
+However, often users also want to do formal statistical tests (or journal reviewers demand them). Hainmueller et al. (2014) describe procedures to conduct such formal tests, but these have -- to my knowledge -- not yet conveniently implemented in a package. Experienced users should of course not have any issues with running these tests themselves, but some others might. 
+
+_This package provides two functions to quickly implement tests for carryover effects and randomization problems as well as methods for quick plotting and tidy exporting of the results_.
+
+## Functions in `conjointdatachecks`
+
+This package includes two functions so far (more will be added as time allows):
+
+* `carryTest()` performs a test for carryover effects
+* `dimRandoTest()` performs a test for randomization problems
+
+`carryTest()` in essence implements the procedure described by Hainmueller et al. (2019, 22): It estimates linear regression models including one vignette attribute/dimension at a time interacted with an ID for the task number as predictors and then estimates an F-test to test for the joint significance of the interaction terms. The results are compiled in a table. A rejected null indicates carryover effects are present in the case of a particular vignette attribute. I show below that Hainmueller et al.'s reported result can be replicated.
+
+`dimRandoTest()` tests if there are significant bivariate associations between a set of vignette attributes and a chosen respondent variable. The test differs depending on whether the respondent variable is metric or categorical. If the variable is metric, (e.g., income), the function runs a one-way ANOVA with the respondent-level variable as the dependent and each individual vignette attribute in a chosen set as the independent variable and compiles the results in a table. If the respondent-level variable is categorical (e.g., gender), the function cross-tabulates each vignette attribute with the respondent-level variable, computes a chi-squared test, and compiles the results in a table.
+
+Both functions have custom S3 methods to quickly plot the results with `plot()` and to export them to a tidy data.frame for more customizable tabulation (e.g., with `xtable`) or plotting (e.g., with `ggplot2`).
+
+## Example analysis using data from the Hainmueller et al. immigration attitudes experiment
+
+To show `conjointdatachecks` in action, I use the now well-known replication data from the Hainmueller et al. immigration attitudes experiment (see 2014, or also [Hainmueller & Hopkins 2015](https://doi.org/10.1111/ajps.12138)).
+
+First, the `conjointdatachecks` package can be installed from GitHub:
+```{r install, eval=F}
+devtools::install_github("https://github.com/cknotz/conjointdatachecks")
+```
+
+The code chunk below then loads the `conjointdatachecks` package and the dataset from the `cjoint` package (which obviously needs to be installed as well). It also does some simple data transformations, including creating a binary version of the variable measuring respondents' level of ethnocentrism.
+
+```{r setup, echo = T, results = 'hide'}
+library(conjointdatachecks)
+
+# Loading Hainmueller et al. immigrant experiment data
+data("immigrationconjoint", package = "cjoint")
+immigrationconjoint$contest_no <- factor(immigrationconjoint$contest_no)
+
+# Split ethnocentrism (by median, following Hainmueller/Hopkins 2015)
+immigrationconjoint$ethno_bin <- factor(ifelse(immigrationconjoint$ethnocentrism>median(immigrationconjoint$ethnocentrism, na.rm = T),
+                                        "High","Low"))
+
+```
+
+### Looking for carryover effects
+
+Hainmueller et al. (2014, 22) report that they looked for carryover effects by estimating a regression with their main outcome variable (the choice for one immigrant profile or another) as the dependent variable, and the `Language Skills` vignette attribute, an indicator for the task number, and interaction terms between the two as predictors. After running an F-test for the joint significance of the interaction terms, they were unable to reject the null of no carryover effects with a _p_-value of ~0.52. 
+
+The code below implements this analysis with the `carryTest()` function and prints the result:
+```{r carrysingle}
+carryTest(data = immigrationconjoint, # identifies data.frame
+          attributes = "`Language Skills`", # identifies vignette attribute(s)
+          outcome = "Chosen_Immigrant", # identifies outcome variable
+          task = "contest_no") # identifies task number ID
+
+```
+
+Hainmueller et al.'s result can be replicated: With a *p*-value of 0.523, we fail to reject the null that no carryover effects are present in the case of the `Language Skills` attribute. But what about the other vignette attributes? We can do a test over all of them as shown below:
+```{r carryall}
+# Select vignette attributes ("dimensions")
+vigdims <- c("Education","Gender","`Country of Origin`",
+             "`Reason for Application`","Job","`Job Experience`",
+             "`Job Plans`","`Prior Entry`","`Language Skills`")
+
+# NOTE: variable names that contain empty spaces need to be put in single quotation marks!
+
+# Run tests
+carryTest(data = immigrationconjoint, # identifies data.frame
+          attributes = vigdims, # identifies vignette attribute(s)
+          outcome = "Chosen_Immigrant", # identifies outcome variable
+          task = "contest_no") # identifies task number ID
+
+```
+
+It turns out that carryover effects are indeed generally absent -- but the null is rejected in the case of one attribute, `Job Experience`. The result can also be shown graphically with a quick base R `plot()`:
+```{r carryplot}
+result <- carryTest(data = immigrationconjoint, # identifies data.frame
+          attributes = vigdims, # identifies vignette attribute(s)
+          outcome = "Chosen_Immigrant", # identifies outcome variable
+          task = "contest_no") # identifies task number ID
+
+plot(result,
+     ltype = 5, # dashed line
+     lcol = "red") # turn line red 
+
+```
+
+To create nicer (publication-ready) plots with `ggplot2` or others, or to easily tabulate the results in *LaTeX* or others, the results can be exported into a tidy data.frame and then post-processed:
+```{r carryexport}
+tidyresults <- as.data.frame(result)
+
+xtable::xtable(tidyresults)
+
+```
+
+### Looking for randomization problems
+
+to be continued...
+
+
+

@@ -3,3 +3,4 @@
 .DS_STORE
 .Rbuildignore
 *.Rproj
+inst/doc

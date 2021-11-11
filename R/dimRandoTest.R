@@ -28,7 +28,8 @@
 #' @param attributes A character vector of vignette attributes' names in the dataset.
 #' @param resvar A respondent-level variable.
 #' @param vartype The type (measurement level) of the respondent variable.
-#' ("metric" or "categorical")
+#' ("metric" or "categorical"). If vartype is "categorical", the variable
+#' needs to be stored as a factor in the dataset.
 #' @return A list of class 'dimRandoTest'. Can be converted to a tidy data.frame
 #' with as.data.frame().
 #' @examples

@@ -19,7 +19,7 @@ print.carryTest <- function(x,...){
   out$Significance <- ifelse(out$p<0.1,"*",out$Significance)
   out$Significance <- ifelse(out$p<0.05,"**",out$Significance)
   out$Significance <- ifelse(out$p<0.01,"***",out$Significance)
-  out$p <- format.pval(as.numeric(out$p), digits=1, nsmall=1)
+  out$p <- format.pval(as.numeric(out$p), digits=3, nsmall=3)
   out$F <- format(as.numeric(out$F),digits=3,nsmall=3)
 
   # separators
