@@ -1,14 +1,21 @@
 #' Produces simple bar plot of carryTest() result
 #'
+#' This creates a bar plot (using base R graphics) showing the main results
+#' from a test for carryover effects: p-values per vignette attribute. For
+#' custom (and publication-quality) graphs, export result as data.frame with
+#' as.data.frame().
+#'
 #' @method plot carryTest
 #' @param x carryTest object
 #' @param showsig Show vertical line indicating sign. threshold (default=TRUE)?
-#' @param lcol Color of sign. threshold line (corresponds to 'col' argument for abline()).
-#' @param ltype Type of sign. threshold line (corresponds to 'lty' argument for abline()).
+#' @param lcol Color of sign. threshold line (corresponds to 'col' argument
+#' for abline()).
+#' @param ltype Type of sign. threshold line (corresponds to 'lty' argument
+#' for abline()).
 #' @param siglev Significance threshold; the default is 0.05.
 #' @param ... ignored
 #'
-#' @importFrom graphics barplot par abline
+#' @importFrom graphics barplot par abline title
 #'
 #' @examples
 #' \dontrun{
@@ -19,7 +26,7 @@
 #' }
 #'
 #' @export
-plot.carryTest <- function(x,lcol=NULL,ltype=NULL,siglev=NULL,showsig=NULL,...){
+plot.carryTest <- function(x,showsig=NULL,lcol=NULL,ltype=NULL,siglev=NULL,...){
 
   # Set sign. line as default T
   if(is.null(showsig)){
@@ -64,7 +71,9 @@ plot.carryTest <- function(x,lcol=NULL,ltype=NULL,siglev=NULL,showsig=NULL,...){
   graphics::barplot(frame$p, names.arg = frame$Attribute, horiz = T,
           cex.names=0.8, xlim = c(0,1),
           ylab="",xlab="F-test p-value")
-  if(showsig==T){ # adds reference line unless set to F
+  if(showsig==T){ # adds reference line & caption unless set to F
     graphics::abline(v=siglev, col=lcol, lty = ltype)
+    graphics::title(main = "", cex.sub = .5,
+                    sub = paste0("Vertical line indicates ",siglev," significance threshold."))
   }
 }

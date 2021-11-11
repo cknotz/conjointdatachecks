@@ -1,62 +1,116 @@
-#' Quick & easy option to plot result from dimRandoTest() as heatmap
+#' Quick & easy option to plot result from dimRandoTest()
+#'
+#' This creates a bar plot (using base R graphics) showing the main results
+#' from a test for successful vignette attribute randomization. Shown are
+#' p-values per vignette attribute based on chi-squared tests or one-way
+#' ANOVA estimations (see ?dimRandoTest for details). For custom (and
+#' publication-quality) graphs, export result as data.frame with as.data.frame().
 #'
 #' @method plot dimRandoTest
 #' @param x dimRandoTest object
-#' @param margins Width of margins for labels. As margins parameter for heatmap().
-#' @param cexRow Size of row labels. As cexRow parameter for heatmap().
-#' @param cexCol Size of column labels. As cexCol parameter for heatmap().
-#' @param col Color scheme. As col parameter for heatmap().
+#' @param showsig Show vertical line to indicate sign. threshold? (default=T)
+#' @param lcol Color of sign. threshold line (corresponds to 'col' argument for abline()).
+#' @param ltype Type of sign. threshold line (corresponds to 'lty' argument for abline()).
+#' @param siglev Significance threshold; the default is 0.05.
 #' @param ... ignored.
 #'
-#' @importFrom stats heatmap
-#' @importFrom grDevices gray.colors
+#' @importFrom graphics barplot par abline title
 #'
 #' @examples
 #' \dontrun{
 #' result <- dimRandoTest(data=experimentdata,
-#' dims=c("age","nationality","gender"),
-#' labels=c("Age","Nationality","Gender"))
+#' attributes=c("age","nationality","gender"),
+#' resvar = "respondent_gender",
+#' vartype = "categorical")
 #'
 #' plot(result)
 #' }
 #'
 #' @export
-plot.dimRandoTest <- function(x,margins=NULL,cexRow=NULL,cexCol=NULL,col=NULL,...){
+plot.dimRandoTest <- function(x,showsig=NULL,lcol=NULL,ltype=NULL,siglev=NULL,...){
 
-  # Set default values for margins, cexRow, & cexCol
-  if(is.null(margins)){
-    margins <- c(7,7)
-  }
-  if(is.null(cexRow)){
-    cexRow <- .8
-  }
-  if(is.null(cexCol)){
-    cexCol <- .8
+  # Set sign. line as default T
+  if(is.null(showsig)){
+    showsig <- T
   }
 
-  # Set default color palette
-  if(is.null(col)){
-    col <- grDevices::gray.colors(n = length(x),
-                       start = 0.05, end = 0.95, rev = T)
+  # set default line color
+  if(is.null(lcol)){
+    lcol <- "black"
   }
 
-  # Clean up - convert back to data.frame format
-  frame <- matrix(unlist(x),nrow = length(x),byrow = T)
+  # set default line type
+  if(is.null(ltype)){
+    ltype <- 5
+  }
 
-  # extract labels, separate results to frame
-  labels <- frame[nrow(frame),]
-  frame <- frame[1:(nrow(frame)-1),]
+  # set default significance level
+  if(is.null(siglev)){
+    siglev <- 0.05
+  }
 
-  # apply labels
-  dimnames(frame) <- list(labels,labels)
+  # Convert list to data.frame
+  frame <- as.data.frame(t(matrix(unlist(x),
+                                  nrow = length(x),
+                                  byrow = T)))
 
-  # extract Cramer's V stats <- hacky, redo if possible
-  frame <- as.data.frame(frame)
-  crams <- as.data.frame(sapply(frame,function(x){as.numeric(gsub("\\D+","", x))}/100))
-  row.names(crams) <- labels
-  crams <- as.matrix(crams)
+  if(unique(frame$V1=="categorical")){
+    # Adjust column types
+    frame$V4 <- as.integer(frame$V4)
+    frame$V5 <- as.numeric(frame$V5)
+    frame$V6 <- as.numeric(frame$V6)
 
-  stats::heatmap(crams,Rowv = NA, Colv = NA,
-          margins = margins,col = col,
-          cexRow = cexRow, cexCol = cexCol)
+
+    if(all(is.na(frame$V7))){
+
+      frame$V7 <- NULL
+      # Label columns
+      colnames(frame) <- c("vartype","respondentvar","Attribute","df","chi-squared","p")
+    }else{
+      # Label columns
+      colnames(frame) <- c("vartype","respondentvar","Attribute","df","chi-squared","p","Note")
+    }
+
+    # Set parameters
+    graphics::par(las=2) # text perpendicular
+    graphics::par(mar=c(5,8,4,2)) # wider margin
+
+    # Output plot
+    graphics::barplot(frame$p, names.arg = frame$Attribute, horiz = T,
+                      cex.names=0.8, xlim = c(0,1),
+                      ylab="",xlab="Chi-squared test p-value")
+    if(showsig==T & is.null(frame$Note)){ # adds reference line & caption unless set to F
+      graphics::abline(v=siglev, col=lcol, lty = ltype)
+      graphics::title(main = unique(frame$respondentvar), cex.sub = .5,
+                      sub = paste0("Vertical line indicates ",siglev," significance threshold."))
+    }else if(showsig==T & !is.null(frame$Note)){
+      graphics::abline(v=siglev, col=lcol, lty = ltype)
+      graphics::title(main = unique(frame$respondentvar), cex.sub = .5,
+                      sub = paste0("Vertical line indicates ",siglev," significance threshold. Note: some expected freq. in chi-squared test were <5!"))
+    }
+
+  }else{
+    # Adjust column types
+    frame$V4 <- as.integer(frame$V4)
+    frame$V5 <- as.numeric(frame$V5)
+    frame$V6 <- as.numeric(frame$V6)
+
+    colnames(frame) <- c("vartype","respondentvar","Attribute","df","F value","p")
+
+    # Set parameters
+    graphics::par(las=2) # text perpendicular
+    graphics::par(mar=c(5,8,4,2)) # wider margin
+
+    # Output plot
+    graphics::barplot(frame$p, names.arg = frame$Attribute, horiz = T,
+                      cex.names=0.8, xlim = c(0,1),
+                      ylab="",xlab="F-test p-value")
+    if(showsig==T){ # adds reference line & caption unless set to F
+      graphics::abline(v=siglev, col=lcol, lty = ltype)
+      graphics::title(main = unique(frame$respondentvar), cex.sub = .5,
+                      sub = paste0("Vertical line indicates ",siglev," significance threshold."))
+
+
+    }
+  }
 }

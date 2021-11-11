@@ -7,6 +7,9 @@
 #' interaction terms. A rejected null indicates carryover effects are present in the case of a particular
 #' vignette attribute (see also Hainmueller et al. 2014, Political Analysis, p. 22).
 #'
+#' The result can be plotted (using plot()) or exported as a tidy data.frame
+#' (using as.data.frame()).
+#'
 #' @param data A data.frame.
 #' @param outcome The outcome variable, rating or choice, entered as a string.
 #' @param attributes A character vector of vignette attributes/dimensions.

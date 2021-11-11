@@ -10,49 +10,105 @@
 #' @export
 print.dimRandoTest <- function(x,...){
 
-  # Clean up - convert back to data.frame format
-  frame <- matrix(unlist(x),nrow = length(x),byrow = T)
+  # Convert list to data.frame
+  frame <- as.data.frame(t(matrix(unlist(x),
+                                  nrow = length(x),
+                                  byrow = T)))
 
-  # extract labels, separate results to frame
-  labels <- frame[nrow(frame),]
-  frame <- frame[1:(nrow(frame)-1),]
+  if(unique(frame$V1)=="metric"){
+    frame$V1 <- NULL # vartype is known
+    frame$V4 <- as.integer(frame$V4)
+    frame$Significance <- rep(" ", length(frame$V2))
+    frame$Significance <- ifelse(frame$V5<0.1,"*",frame$Significance)
+    frame$Significance <- ifelse(frame$V5<0.05,"**",frame$Significance)
+    frame$Significance <- ifelse(frame$V5<0.01,"***",frame$Significance)
+    frame$V5 <- format(round(as.numeric(frame$V5), digits = 3),nsmall=3)
+    frame$V6 <- format(round(as.numeric(frame$V6), digits = 3),nsmall=3)
 
-  # apply labels
-  dimnames(frame) <- list(labels,labels)
+    # Extract respondent var:
+    respvar <- unique(frame$V2)
+    frame$V2 <- NULL
 
-  frame[upper.tri(frame)] <- NA # sets redundant entries to NA
+    # Label columns
+    colnames(frame) <- c("Attribute","df","F value","p","Significance")
 
-  rownames(frame) <- NULL
-  frame <- cbind(labels,frame)
+    # separators
+    longest_att <- max(sapply(frame$Attribute,function(x){nchar(x)})) # longest attribute
+    longest_df <- max(sapply(frame$df,function(x){nchar(x)})) # longest attribute
 
-  # construct separator
-  longest_lab <- max(sapply(labels,function(x){nchar(x)}))
-  lengths_lab <- sapply(labels,function(x){nchar(x)})
-  lengths_lab[which(lengths_lab<8)] <- 8 # to avoid gaps; cell content has length 8
+    sep <- c(paste(rep("-",longest_att),collapse = ""),
+             paste(rep("-",longest_df+2),collapse = ""),
+             paste(rep("-",8),collapse = ""),
+             paste(rep("-",6),collapse = ""),
+             paste(rep("-",12),collapse = ""))
 
-  attributes(lengths_lab) <- NULL
-  sep <- c(paste(rep("-",longest_lab),collapse = ""),sapply(lengths_lab,function(x){
-    paste(rep("-",x),collapse = "")
-  }))
+    frame <- rbind(sep,frame,sep)
 
-  # Add separators to matrix
-  frame <- rbind(c(paste(rep("-",longest_lab),collapse = ""),sapply(lengths_lab,function(x){
-    paste(rep("-",x),collapse = "")
-  })),frame,c(paste(rep("-",longest_lab),collapse = ""),sapply(lengths_lab,function(x){
-    paste(rep("-",x),collapse = "")
-  })))
+    cat(paste0(" Test for randomization across respondents (using ",respvar,")\n"))
+    cat("",sep,"\n")
+    print(frame, row.names=F, right = F)
+    cat(paste0(" Results from one-way ANOVA estimations with ",respvar,"\n as the dep. variable.\n"))
+    cat(" Significance levels: * p<0.1; ** p<0.05; *** p<0.01\n")
+  }else
+    if(unique(frame$V1=="categorical")){
 
-  # Add empty row at bottom
-  frame <- rbind(frame,rep(" ",length(ncol(frame))))
+      frame <- as.data.frame(t(matrix(unlist(x),
+                                      nrow = length(x),
+                                      byrow = T)))
 
-  # Apply labels
-  collabs <- c(" ",labels)
 
-  # Print
-  cat("\n")
-  cat(" Test for successful randomization of vignette attributes\n")
-  cat("",sep,"\n")
-  prmatrix(frame, collab = collabs, rowlab = rep_len("", nrow(frame)),
-           na.print = " ", quote = F)
-  cat(" Numbers in cells are Cramer's V statistics.\n Significance levels: * p<0.1; ** p<0.05; *** p<0.01\n Significances based on chi-squared tests.")
+
+      # Clean data.frame
+      respvar <- unique(frame$V2)
+      frame$V2 <- NULL
+      frame$V1 <- NULL # no longer necessary
+
+      frame$V4 <- as.integer(frame$V4)
+      frame$Significance <- rep(" ", length(frame$V3))
+      frame$Significance <- ifelse(frame$V6<0.1,"*",frame$Significance)
+      frame$Significance <- ifelse(frame$V6<0.05,"**",frame$Significance)
+      frame$Significance <- ifelse(frame$V6<0.01,"***",frame$Significance)
+      frame$V5 <- format(round(as.numeric(frame$V5), digits = 3),nsmall=3)
+      frame$V6 <- format(round(as.numeric(frame$V6), digits = 3),nsmall=3)
+
+      # reorder columns
+      neword <- c("V3","V4","V5","V6","Significance","V7")
+      frame <- frame[,neword]
+      rm(neword)
+
+      # Label
+      colnames(frame) <- c("Attribute","df","chi-squared","p","Significance","Note")
+
+      # Identify attribute lengths
+      longest_att <- max(sapply(frame$Attribute,function(x){nchar(x)})) # longest attribute
+      longest_df <- max(sapply(frame$df,function(x){nchar(x)})) # longest attribute
+
+      # Eliminate note if not relevant (no e<5) & define separator for smaller table
+      if(all(is.na(frame$Note))){
+        frame$Note <- NULL
+
+        sep <- c(paste(rep("-",longest_att),collapse = ""),
+                 paste(rep("-",longest_df+2),collapse = ""),
+                 paste(rep("-",12),collapse = ""),
+                 paste(rep("-",6),collapse = ""),
+                 paste(rep("-",12),collapse = ""))
+      } else{ # define separator for wider table, w/ note
+        sep <- c(paste(rep("-",longest_att),collapse = ""),
+                 paste(rep("-",longest_df+2),collapse = ""),
+                 paste(rep("-",12),collapse = ""),
+                 paste(rep("-",6),collapse = ""),
+                 paste(rep("-",12),collapse = ""),
+                 paste(rep("-",12),collapse = ""))
+
+      }
+
+      # Create output table
+      frame <- rbind(sep,frame,sep)
+
+      cat(paste0(" Test for randomization across respondents (using ",respvar,")\n"))
+      cat("",sep,"\n")
+      print(frame, row.names=F,right=F)
+      cat(paste0(" Results from chi-squared tests on contingency tables \n of ",respvar," and each attribute.\n"))
+      cat(" Significance levels: * p<0.1; ** p<0.05; *** p<0.01\n")
+    }
 }

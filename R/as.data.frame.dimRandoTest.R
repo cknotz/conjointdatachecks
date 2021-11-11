@@ -9,20 +9,38 @@
 #'
 #' @export
 as.data.frame.dimRandoTest <- function(x,...){
+  # Convert list to data.frame
+  frame <- as.data.frame(t(matrix(unlist(x),
+                                  nrow = length(x),
+                                  byrow = T)))
 
-  # Clean up - convert back to data.frame format
-  frame <- matrix(unlist(x),nrow = length(x),byrow = T)
+  if(unique(frame$V1=="categorical")){
+    # Adjust column types
+    frame$V4 <- as.integer(frame$V4)
+    frame$V5 <- as.numeric(frame$V5)
+    frame$V6 <- as.numeric(frame$V6)
 
-  # extract labels, separate results to frame
-  labels <- frame[nrow(frame),]
-  frame <- frame[1:(nrow(frame)-1),]
 
-  # apply labels
-  dimnames(frame) <- list(labels,labels)
+    if(all(is.na(frame$V7))){
 
-  frame[upper.tri(frame)] <- NA # sets redundant entries to NA
+      frame$V7 <- NULL
+      # Label columns
+      colnames(frame) <- c("vartype","respondentvar","Attribute","df","chi-squared","p")
+    }else{
+      # Label columns
+      colnames(frame) <- c("vartype","respondentvar","Attribute","df","chi-squared","p","Note")
+    }
 
-  # final convert & return
-  frame <- as.data.frame(frame)
-  return(frame)
+    return(frame)
+  }else{
+    # Adjust column types
+    frame$V4 <- as.integer(frame$V4)
+    frame$V5 <- as.numeric(frame$V5)
+    frame$V6 <- as.numeric(frame$V6)
+
+    colnames(frame) <- c("vartype","respondentvar","Attribute","df","F value","p")
+    return(frame)
+
+
+  }
 }

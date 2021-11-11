@@ -2,31 +2,36 @@
 % Please edit documentation in R/plot.dimRandoTest.R
 \name{plot.dimRandoTest}
 \alias{plot.dimRandoTest}
-\title{Quick & easy option to plot result from dimRandoTest() as heatmap}
+\title{Quick & easy option to plot result from dimRandoTest()}
 \usage{
-\method{plot}{dimRandoTest}(x, margins = NULL, cexRow = NULL, cexCol = NULL, col = NULL, ...)
+\method{plot}{dimRandoTest}(x, showsig = NULL, lcol = NULL, ltype = NULL, siglev = NULL, ...)
 }
 \arguments{
 \item{x}{dimRandoTest object}
 
-\item{margins}{Width of margins for labels. As margins parameter for heatmap().}
+\item{showsig}{Show vertical line to indicate sign. threshold? (default=T)}
 
-\item{cexRow}{Size of row labels. As cexRow parameter for heatmap().}
+\item{lcol}{Color of sign. threshold line (corresponds to 'col' argument for abline()).}
 
-\item{cexCol}{Size of column labels. As cexCol parameter for heatmap().}
+\item{ltype}{Type of sign. threshold line (corresponds to 'lty' argument for abline()).}
 
-\item{col}{Color scheme. As col parameter for heatmap().}
+\item{siglev}{Significance threshold; the default is 0.05.}
 
 \item{...}{ignored.}
 }
 \description{
-Quick & easy option to plot result from dimRandoTest() as heatmap
+This creates a bar plot (using base R graphics) showing the main results
+from a test for successful vignette attribute randomization. Shown are
+p-values per vignette attribute based on chi-squared tests or one-way
+ANOVA estimations (see ?dimRandoTest for details). For custom (and
+publication-quality) graphs, export result as data.frame with as.data.frame().
 }
 \examples{
 \dontrun{
 result <- dimRandoTest(data=experimentdata,
-dims=c("age","nationality","gender"),
-labels=c("Age","Nationality","Gender"))
+attributes=c("age","nationality","gender"),
+resvar = "respondent_gender",
+vartype = "categorical")
 
 plot(result)
 }

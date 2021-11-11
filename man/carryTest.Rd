@@ -26,6 +26,10 @@ ID for the task number as predictors and then estimates an F-test to test for th
 interaction terms. A rejected null indicates carryover effects are present in the case of a particular
 vignette attribute (see also Hainmueller et al. 2014, Political Analysis, p. 22).
 }
+\details{
+The result can be plotted (using plot()) or exported as a tidy data.frame
+(using as.data.frame()).
+}
 \examples{
 \dontrun{
 carryTest(data=experimentdata,

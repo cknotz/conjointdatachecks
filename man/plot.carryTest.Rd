@@ -4,23 +4,28 @@
 \alias{plot.carryTest}
 \title{Produces simple bar plot of carryTest() result}
 \usage{
-\method{plot}{carryTest}(x, lcol = NULL, ltype = NULL, siglev = NULL, showsig = NULL, ...)
+\method{plot}{carryTest}(x, showsig = NULL, lcol = NULL, ltype = NULL, siglev = NULL, ...)
 }
 \arguments{
 \item{x}{carryTest object}
 
-\item{lcol}{Color of sign. threshold line (corresponds to 'col' argument for abline()).}
+\item{showsig}{Show vertical line indicating sign. threshold (default=TRUE)?}
 
-\item{ltype}{Type of sign. threshold line (corresponds to 'lty' argument for abline()).}
+\item{lcol}{Color of sign. threshold line (corresponds to 'col' argument
+for abline()).}
+
+\item{ltype}{Type of sign. threshold line (corresponds to 'lty' argument
+for abline()).}
 
 \item{siglev}{Significance threshold; the default is 0.05.}
-
-\item{showsig}{Show vertical line indicating sign. threshold (default=TRUE)?}
 
 \item{...}{ignored}
 }
 \description{
-Produces simple bar plot of carryTest() result
+This creates a bar plot (using base R graphics) showing the main results
+from a test for carryover effects: p-values per vignette attribute. For
+custom (and publication-quality) graphs, export result as data.frame with
+as.data.frame().
 }
 \examples{
 \dontrun{

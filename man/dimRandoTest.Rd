@@ -4,34 +4,59 @@
 \alias{dimRandoTest}
 \title{Checks if vignette attributes are uncorrelated}
 \usage{
-dimRandoTest(data, dims, labels = NULL)
+dimRandoTest(data, attributes, resvar, vartype)
 }
 \arguments{
 \item{data}{A data.frame.}
 
-\item{dims}{A character vector of vignette attributes' names in the dataset.}
+\item{attributes}{A character vector of vignette attributes' names in the dataset.}
 
-\item{labels}{Optional. A character vector of labels for the vignette attributes
-(Important: the order of the labels must correspond to the order of attributes in dims!).}
+\item{resvar}{A respondent-level variable.}
+
+\item{vartype}{The type (measurement level) of the respondent variable.
+("metric" or "categorical")}
 }
 \value{
-A list of class 'dimRandoTest'. Can be converted to a data.frame with as.data.frame().
+A list of class 'dimRandoTest'. Can be converted to a tidy data.frame
+with as.data.frame().
 }
 \description{
 \code{dimRandoTest} checks data from conjoint experiments for randomization
-problems by checking for associations between any pair of profile attributes.
-it cross-tabulates all combinations of profile attributes and computes chi-squared
-tests to test if there are any significant associations between these attributes.
-A rejected null (small p-value) indicates that there is some statistically
-significant association between profile attributes. A Cramer's V test statistic
-is also provided for each attribute combination to indicate the strength of any
-association between the attributes. The output can be labeled.
+problems by checking for associations between vignette attributes and
+respondent-level variables.
+}
+\details{
+If the respondent-level variable is categorical (e.g., gender), the function
+cross-tabulates each vignette attribute with the respondent-level variable,
+computes a chi-squared test, and compiles the results.
+
+If the respondent-level variable is metric (e.g., income), the function runs
+a one-way ANOVA with the respondent-level variable as the dependent and each
+vignette attribute as the independent variable and compiles the results.
+
+Users need to specify whether their respondent-level variable is metric or
+categorical.
+
+In both cases, a rejected null (small p-value) indicates
+that there is some statistically significant association between a given
+profile attribute and the respondent variable, which in turn signals that
+there might have been issues with the random assignment of vignettes to
+respondents.
+
+The result can be plotted (using plot()) or exported as a tidy data.frame
+(using as.data.frame()).
 }
 \examples{
 \dontrun{
 dimRandoTest(data=experimentdata,
-dims=c("age","nationality","gender"),
-labels=c("Age","Nationality","Gender"))
+attributes=c("age","nationality","gender"),
+resvar = "respondent_gender",
+vartype = "categorical")
+
+dimRandoTest(data=experimentdata,
+attributes=c("age","nationality","gender"),
+resvar = "respondent_income",
+vartype = "metric")
 }
 
 }
