@@ -7,12 +7,15 @@
 #'
 #' @method plot carryTest
 #' @param x carryTest object
-#' @param showsig Show vertical line indicating sign. threshold (default=TRUE)?
-#' @param lcol Color of sign. threshold line (corresponds to 'col' argument
+#' @param showsig Show vertical line to indicate sign. threshold? (optional,
+#' default=T)
+#' @param lcol Color of sign. threshold line (optional, changes 'col' argument
 #' for abline()).
-#' @param ltype Type of sign. threshold line (corresponds to 'lty' argument
+#' @param ltype Type of sign. threshold line (optional, changes 'lty' argument
 #' for abline()).
-#' @param siglev Significance threshold; the default is 0.05.
+#' @param siglev Significance threshold (optional, the default is 0.05).
+#' @param margins Plot margins (optional; changes par(mar())); must be a numeric
+#' vector of length 4.
 #' @param ... ignored
 #'
 #' @importFrom graphics barplot par abline title
@@ -26,7 +29,7 @@
 #' }
 #'
 #' @export
-plot.carryTest <- function(x,showsig=NULL,lcol=NULL,ltype=NULL,siglev=NULL,...){
+plot.carryTest <- function(x,showsig=NULL,lcol=NULL,ltype=NULL,siglev=NULL,margins=NULL,...){
 
   # Set sign. line as default T
   if(is.null(showsig)){
@@ -48,6 +51,11 @@ plot.carryTest <- function(x,showsig=NULL,lcol=NULL,ltype=NULL,siglev=NULL,...){
     siglev <- 0.05
   }
 
+  # Set default plot margins
+  if(is.null(margins)){
+    margins <- c(2,8,2,2)
+  }
+
   # Covert list to data.frame
   frame <- data.frame(t(matrix(unlist(x), nrow = length(x), byrow = T)))
 
@@ -65,7 +73,7 @@ plot.carryTest <- function(x,showsig=NULL,lcol=NULL,ltype=NULL,siglev=NULL,...){
 
   # Set plot parameters (from statsmethods.net)
   graphics::par(las=2) # text perpendicular
-  graphics::par(mar=c(5,8,4,2)) # wider margin
+  graphics::par(mar=margins) # plot margins
 
   # Output plot
   graphics::barplot(frame$p, names.arg = frame$Attribute, horiz = T,

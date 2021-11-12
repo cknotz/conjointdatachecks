@@ -10,7 +10,7 @@
 #' The result can be plotted (using plot()) or exported as a tidy data.frame
 #' (using as.data.frame()).
 #'
-#' @param data A data.frame.
+#' @param data A data.frame (in long format).
 #' @param outcome The outcome variable, rating or choice, entered as a string.
 #' @param attributes A character vector of vignette attributes/dimensions.
 #' @param task The task- or contest-ID; should be a factor in the data, entered here as a string.
@@ -58,8 +58,7 @@ carryTest <- function(data, outcome, attributes, task) {
     fstat <- ((rrss-urss)/s)/(urss/(df_full))
     fstat
 
-    pval <- format.pval(pf(fstat,s,df_full,lower.tail = F),
-                        eps = .001, digits = 4)
+    pval <- pf(fstat,s,df_full,lower.tail = F)
 
     res <- c(fstat,s,df_full,pval)
   }))))

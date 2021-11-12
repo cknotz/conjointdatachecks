@@ -4,6 +4,8 @@ output:
   rmarkdown::html_vignette:
     toc: true
     toc_depth: 3
+    fig_width: 8 
+    fig_height: 6 
 date: "`r Sys.Date()`"
 author: "Carlo Knotz"
 vignette: >
@@ -63,13 +65,9 @@ library(conjointdatachecks)
 data("immigrationconjoint", package = "cjoint")
 immigrationconjoint$contest_no <- factor(immigrationconjoint$contest_no)
 
-# Split ethnocentrism (by median, following Hainmueller/Hopkins 2015)
-immigrationconjoint$ethno_bin <- factor(ifelse(immigrationconjoint$ethnocentrism>median(immigrationconjoint$ethnocentrism, na.rm = T),
-                                        "High","Low"))
-
 ```
 
-### Looking for carryover effects
+### Testing for carryover effects
 
 Hainmueller et al. (2014, 22) report that they looked for carryover effects by estimating a regression with their main outcome variable (the choice for one immigrant profile or another) as the dependent variable, and the `Language Skills` vignette attribute, an indicator for the task number, and interaction terms between the two as predictors. After running an F-test for the joint significance of the interaction terms, they were unable to reject the null of no carryover effects with a _p_-value of ~0.52. 
 
@@ -82,7 +80,7 @@ carryTest(data = immigrationconjoint, # identifies data.frame
 
 ```
 
-Hainmueller et al.'s result can be replicated: With a *p*-value of 0.523, we fail to reject the null that no carryover effects are present in the case of the `Language Skills` attribute. But what about the other vignette attributes? We can do a test over all of them as shown below:
+Hainmueller et al.'s result can be replicated: With a *p*-value of 0.524, we fail to reject the null that no carryover effects are present in the case of the `Language Skills` attribute. But what about the other vignette attributes? We can do a test over all of them as shown below:
 ```{r carryall}
 # Select vignette attributes ("dimensions")
 vigdims <- c("Education","Gender","`Country of Origin`",
@@ -108,21 +106,88 @@ result <- carryTest(data = immigrationconjoint, # identifies data.frame
 
 plot(result,
      ltype = 5, # dashed line
-     lcol = "red") # turn line red 
+     lcol = "red",# turn line red 
+     margins = c(5,8,1,2)) # adjust plot margins
 
 ```
 
-To create nicer (publication-ready) plots with `ggplot2` or others, or to easily tabulate the results in *LaTeX* or others, the results can be exported into a tidy data.frame and then post-processed:
+To create nicer (publication-ready) plots with `ggplot2` or others, or to easily tabulate the results in *LaTeX* or others with `xtable`, the results can be exported into a tidy data.frame and then post-processed:
 ```{r carryexport}
 tidyresults <- as.data.frame(result)
-
-xtable::xtable(tidyresults)
+tidyresults
 
 ```
 
-### Looking for randomization problems
+To get a better sense of what is behind the significant finding in the case of the Job Experience attribute -- and to see if this is not only _statistically_ but also _substantively_ significant -- we can use the `cregg` package to do a visual inspection:
+```{r cregg, warning = FALSE}
+library(cregg)
+f1 <- Chosen_Immigrant ~ `Job Experience`
 
-to be continued...
+plot(cregg::cj(immigrationconjoint, f1, id = ~CaseID,
+                      by = ~contest_no, estimate = "mm"),
+            group = "contest_no", vline = 0.5,feature_headers = FALSE)
+
+```
+
+Some of the marginal mean estimates do really appear to differ between the tasks (see e.g., the marginal mean for 'no job experience' in task #2, or several marginal means for the `1-2 years' category). This being said, it is not obvious that the relevance of the 'Job Experience' attribute changes in a really systematic fashion across the different tasks.
+
+### Testing for randomization problems
+
+Since survey experiments are nowadays often administered online and the random assignment of experimental conditions is left to computers, randomization problems are not that likely to happen. Still, it can be important to check -- for example, where a survey and the experiment(s) included in it are administered not by researchers themselves but by external providers, researchers might want to run a quick initial check on the data to be able refuse (and avoid paying for!) problematic data.
+
+`dimRandoTest()` makes it possible to do this quickly with data from conjoint experiments. The function runs fairly simple statistical tests for bivariate associations between a chosen respondent-level variable and a set of vignette attributes. The tests are fairly basic: If the respondent-level variable is metric, an ANOVA is estimated. If the respondent-level variable is categorical, the function uses a chi-squared test. In the latter case, the function will also add a note if there are cases where a chi-squared test is run and the minimum expected frequency of any cell in the corresponding contingency table is less than 5.
+
+If we are working with a metric respondent-level variable -- e.g., the ethnocentrism measure in the Hainmueller et al. experiment -- we declare this in the call to `dimRandoTest()` as shown below:
+```{r dimrando}
+result <- dimRandoTest(data = immigrationconjoint,
+                        attributes = vigdims, # we use the same vignette attr. as before
+                        resvar = "ethnocentrism",
+                        vartype = "metric")
+
+result
+
+```
+
+The note under the printed results confirms that the appropriate test is run, an ANOVA. More importantly, we do not find any significant associations: The type of vignettes respondents saw is entirely uncorrelated with their reported ethnocentrism.
+
+To illustrate how `dimRandoTest()` works with a categorical respondent-level variable, we can dummy-code the ethnocentrism variable and then run the test with this variable:
+```{r dimrando_bin}
+
+# Split ethnocentrism (by median, following Hainmueller/Hopkins 2015)
+immigrationconjoint$ethno_bin <- factor(ifelse(immigrationconjoint$ethnocentrism>median(immigrationconjoint$ethnocentrism, na.rm = T),
+                                        "High","Low"))
+
+dimRandoTest(data = immigrationconjoint,
+                        attributes = vigdims, # we use the same vignette attr. as before
+                        resvar = "ethno_bin",
+                        vartype = "categorical")
 
 
+```
+
+The result is the same as before: We find no randomization problems.
+
+As in the case of `carryTest()`, the results from `dimRandoTest()` can be quickly plotted:
+```{r dimrandoplot}
+
+result <- dimRandoTest(data = immigrationconjoint,
+                        attributes = vigdims, # we use the same vignette attr. as before
+                        resvar = "ethno_bin",
+                        vartype = "categorical")
+
+plot(result,
+     margins = c(5,8,2,2))
+
+```
+
+Alternatively, the results can also be exported to a tidy data.frame for custom tabulation or plotting:
+```{r dimrandotab}
+tidyresult <- as.data.frame(result)
+tidyresult
+
+```
+
+## Next steps
+
+The current version of the `cjointdatachecks` package is the first -- and it should be developed further. Any questions, comments, or suggestions for further improvement are more than welcome. Feel free to write to [carlo.knotz@uis.no](mailto:carlo.knotz@uis.no).
 

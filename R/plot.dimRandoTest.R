@@ -8,10 +8,14 @@
 #'
 #' @method plot dimRandoTest
 #' @param x dimRandoTest object
-#' @param showsig Show vertical line to indicate sign. threshold? (default=T)
-#' @param lcol Color of sign. threshold line (corresponds to 'col' argument for abline()).
-#' @param ltype Type of sign. threshold line (corresponds to 'lty' argument for abline()).
-#' @param siglev Significance threshold; the default is 0.05.
+#' @param showsig Show vertical line to indicate sign. threshold? (optional, default=T)
+#' @param lcol Color of sign. threshold line (optional, changes 'col' argument
+#' for abline()).
+#' @param ltype Type of sign. threshold line (optional, changes 'lty' argument
+#' for abline()).
+#' @param siglev Significance threshold (optional, the default is 0.05).
+#' @param margins Plot margins (optional; changes par(mar())); must be a numeric
+#' vector of length 4.
 #' @param ... ignored.
 #'
 #' @importFrom graphics barplot par abline title
@@ -27,7 +31,7 @@
 #' }
 #'
 #' @export
-plot.dimRandoTest <- function(x,showsig=NULL,lcol=NULL,ltype=NULL,siglev=NULL,...){
+plot.dimRandoTest <- function(x,showsig=NULL,lcol=NULL,ltype=NULL,siglev=NULL,margins=NULL,...){
 
   # Set sign. line as default T
   if(is.null(showsig)){
@@ -47,6 +51,11 @@ plot.dimRandoTest <- function(x,showsig=NULL,lcol=NULL,ltype=NULL,siglev=NULL,..
   # set default significance level
   if(is.null(siglev)){
     siglev <- 0.05
+  }
+
+  # Set default plot margins
+  if(is.null(margins)){
+    margins <- c(2,8,2,2)
   }
 
   # Convert list to data.frame
@@ -73,7 +82,7 @@ plot.dimRandoTest <- function(x,showsig=NULL,lcol=NULL,ltype=NULL,siglev=NULL,..
 
     # Set parameters
     graphics::par(las=2) # text perpendicular
-    graphics::par(mar=c(5,8,4,2)) # wider margin
+    graphics::par(mar=margins) # plot margins
 
     # Output plot
     graphics::barplot(frame$p, names.arg = frame$Attribute, horiz = T,

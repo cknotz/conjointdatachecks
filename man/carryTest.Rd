@@ -7,7 +7,7 @@
 carryTest(data, outcome, attributes, task)
 }
 \arguments{
-\item{data}{A data.frame.}
+\item{data}{A data.frame (in long format).}
 
 \item{outcome}{The outcome variable, rating or choice, entered as a string.}
 

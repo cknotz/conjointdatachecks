@@ -4,20 +4,32 @@
 \alias{plot.carryTest}
 \title{Produces simple bar plot of carryTest() result}
 \usage{
-\method{plot}{carryTest}(x, showsig = NULL, lcol = NULL, ltype = NULL, siglev = NULL, ...)
+\method{plot}{carryTest}(
+  x,
+  showsig = NULL,
+  lcol = NULL,
+  ltype = NULL,
+  siglev = NULL,
+  margins = NULL,
+  ...
+)
 }
 \arguments{
 \item{x}{carryTest object}
 
-\item{showsig}{Show vertical line indicating sign. threshold (default=TRUE)?}
+\item{showsig}{Show vertical line to indicate sign. threshold? (optional,
+default=T)}
 
-\item{lcol}{Color of sign. threshold line (corresponds to 'col' argument
+\item{lcol}{Color of sign. threshold line (optional, changes 'col' argument
 for abline()).}
 
-\item{ltype}{Type of sign. threshold line (corresponds to 'lty' argument
+\item{ltype}{Type of sign. threshold line (optional, changes 'lty' argument
 for abline()).}
 
-\item{siglev}{Significance threshold; the default is 0.05.}
+\item{siglev}{Significance threshold (optional, the default is 0.05).}
+
+\item{margins}{Plot margins (optional; changes par(mar())); must be a numeric
+vector of length 4.}
 
 \item{...}{ignored}
 }

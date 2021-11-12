@@ -24,7 +24,7 @@
 #' The result can be plotted (using plot()) or exported as a tidy data.frame
 #' (using as.data.frame()).
 #'
-#' @param data A data.frame.
+#' @param data A data.frame (in long format).
 #' @param attributes A character vector of vignette attributes' names in the dataset.
 #' @param resvar A respondent-level variable.
 #' @param vartype The type (measurement level) of the respondent variable.
@@ -45,7 +45,7 @@
 #' vartype = "metric")
 #' }
 #'
-#' @importFrom stats chisq.test
+#' @importFrom stats chisq.test aov
 #'
 #' @export
 dimRandoTest <- function(data,attributes,resvar,vartype){

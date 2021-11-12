@@ -4,18 +4,31 @@
 \alias{plot.dimRandoTest}
 \title{Quick & easy option to plot result from dimRandoTest()}
 \usage{
-\method{plot}{dimRandoTest}(x, showsig = NULL, lcol = NULL, ltype = NULL, siglev = NULL, ...)
+\method{plot}{dimRandoTest}(
+  x,
+  showsig = NULL,
+  lcol = NULL,
+  ltype = NULL,
+  siglev = NULL,
+  margins = NULL,
+  ...
+)
 }
 \arguments{
 \item{x}{dimRandoTest object}
 
-\item{showsig}{Show vertical line to indicate sign. threshold? (default=T)}
+\item{showsig}{Show vertical line to indicate sign. threshold? (optional, default=T)}
 
-\item{lcol}{Color of sign. threshold line (corresponds to 'col' argument for abline()).}
+\item{lcol}{Color of sign. threshold line (optional, changes 'col' argument
+for abline()).}
 
-\item{ltype}{Type of sign. threshold line (corresponds to 'lty' argument for abline()).}
+\item{ltype}{Type of sign. threshold line (optional, changes 'lty' argument
+for abline()).}
 
-\item{siglev}{Significance threshold; the default is 0.05.}
+\item{siglev}{Significance threshold (optional, the default is 0.05).}
+
+\item{margins}{Plot margins (optional; changes par(mar())); must be a numeric
+vector of length 4.}
 
 \item{...}{ignored.}
 }

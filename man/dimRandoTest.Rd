@@ -7,7 +7,7 @@
 dimRandoTest(data, attributes, resvar, vartype)
 }
 \arguments{
-\item{data}{A data.frame.}
+\item{data}{A data.frame (in long format).}
 
 \item{attributes}{A character vector of vignette attributes' names in the dataset.}
 

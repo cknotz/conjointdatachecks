@@ -22,7 +22,8 @@ print.dimRandoTest <- function(x,...){
     frame$Significance <- ifelse(frame$V5<0.1,"*",frame$Significance)
     frame$Significance <- ifelse(frame$V5<0.05,"**",frame$Significance)
     frame$Significance <- ifelse(frame$V5<0.01,"***",frame$Significance)
-    frame$V5 <- format(round(as.numeric(frame$V5), digits = 3),nsmall=3)
+    frame$V5 <- format.pval(as.numeric(frame$V5), justify="right",
+                            digits = 3, eps = 0.001)
     frame$V6 <- format(round(as.numeric(frame$V6), digits = 3),nsmall=3)
 
     # Extract respondent var:
@@ -31,6 +32,7 @@ print.dimRandoTest <- function(x,...){
 
     # Label columns
     colnames(frame) <- c("Attribute","df","F value","p","Significance")
+    frame$Attribute <- format(frame$Attribute, justify = "left")
 
     # separators
     longest_att <- max(sapply(frame$Attribute,function(x){nchar(x)})) # longest attribute
