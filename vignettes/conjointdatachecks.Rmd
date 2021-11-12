@@ -1,11 +1,11 @@
 ---
 title: "conjointdatachecks"
-output: 
+output:
   rmarkdown::html_vignette:
     toc: true
     toc_depth: 3
-    fig_width: 8 
-    fig_height: 6 
+    fig_width: 8
+    fig_height: 6
 date: "`r Sys.Date()`"
 author: "Carlo Knotz"
 vignette: >
@@ -24,13 +24,13 @@ knitr::opts_chunk$set(
 ## The purpose of this package
 
 Conjoint survey experiments have become a popular tool among political scientists since
-Hainmueller et al. introduced the methodology in their 2014 article in [_Political Analysis_](https://www.cambridge.org/core/journals/political-analysis/article/causal-inference-in-conjoint-analysis-understanding-multidimensional-choices-via-stated-preference-experiments/414DA03BAA2ACE060FFE005F53EFF8C8) 
+Hainmueller et al. introduced the methodology in their 2014 article in [_Political Analysis_](https://www.cambridge.org/core/journals/political-analysis/article/causal-inference-in-conjoint-analysis-understanding-multidimensional-choices-via-stated-preference-experiments/414DA03BAA2ACE060FFE005F53EFF8C8)
 and the associated `cjoint` package for `R`.
 
 Thomas Leeper's `cregg` [package](https://cran.r-project.org/web/packages/cregg/vignettes/Introduction.html) then further expanded the toolkit for conjoint analysis, notably by providing
 functions to check the quality of data from conjoint experiments. One data quality problem that can arise are **carryover effects**. These arise when respondents go through several rounds in which they evaluate or choose vignettes, and when their ratings or choices in later rounds are influenced by what they saw in earlier rounds. A second potential problem that can appear are **randomization problems**. These result when the random assignment of vignettes to respondents does not work and, say, male respondents were more likely to see some types of vignettes than female respondents. `cregg` allows users to identify these problems via a graphical inspection of the data.
 
-However, often users also want to do formal statistical tests (or journal reviewers demand them). Hainmueller et al. (2014) describe procedures to conduct such formal tests, but these have -- to my knowledge -- not yet conveniently implemented in a package. Experienced users should of course not have any issues with running these tests themselves, but some others might. 
+However, often users also want to do formal statistical tests (or journal reviewers demand them). Hainmueller et al. (2014) describe procedures to conduct such formal tests, but these have -- to my knowledge -- not yet conveniently implemented in a package. Experienced users should of course not have any issues with running these tests themselves, but some others might.
 
 _This package provides two functions to quickly implement tests for carryover effects and randomization problems as well as methods for quick plotting and tidy exporting of the results_.
 
@@ -69,7 +69,7 @@ immigrationconjoint$contest_no <- factor(immigrationconjoint$contest_no)
 
 ### Testing for carryover effects
 
-Hainmueller et al. (2014, 22) report that they looked for carryover effects by estimating a regression with their main outcome variable (the choice for one immigrant profile or another) as the dependent variable, and the `Language Skills` vignette attribute, an indicator for the task number, and interaction terms between the two as predictors. After running an F-test for the joint significance of the interaction terms, they were unable to reject the null of no carryover effects with a _p_-value of ~0.52. 
+Hainmueller et al. (2014, 22) report that they looked for carryover effects by estimating a regression with their main outcome variable (the choice for one immigrant profile or another) as the dependent variable, and the `Language Skills` vignette attribute, an indicator for the task number, and interaction terms between the two as predictors. After running an F-test for the joint significance of the interaction terms, they were unable to reject the null of no carryover effects with a _p_-value of ~0.52.
 
 The code below implements this analysis with the `carryTest()` function and prints the result:
 ```{r carrysingle}
@@ -106,7 +106,7 @@ result <- carryTest(data = immigrationconjoint, # identifies data.frame
 
 plot(result,
      ltype = 5, # dashed line
-     lcol = "red",# turn line red 
+     lcol = "red",# turn line red
      margins = c(5,8,1,2)) # adjust plot margins
 
 ```
@@ -129,7 +129,7 @@ plot(cregg::cj(immigrationconjoint, f1, id = ~CaseID,
 
 ```
 
-Some of the marginal mean estimates do really appear to differ between the tasks (see e.g., the marginal mean for 'no job experience' in task #2, or several marginal means for the `1-2 years' category). This being said, it is not obvious that the relevance of the 'Job Experience' attribute changes in a really systematic fashion across the different tasks.
+Some of the marginal mean estimates do really appear to differ between the tasks (see e.g., the marginal mean for 'no job experience' in task #2, or several marginal means for the '1-2 years' category). This being said, it is not obvious that the relevance of the 'Job Experience' attribute changes in a really systematic fashion across the different tasks.
 
 ### Testing for randomization problems
 
@@ -190,4 +190,3 @@ tidyresult
 ## Next steps
 
 The current version of the `cjointdatachecks` package is the first -- and it should be developed further. Any questions, comments, or suggestions for further improvement are more than welcome. Feel free to write to [carlo.knotz@uis.no](mailto:carlo.knotz@uis.no).
-
