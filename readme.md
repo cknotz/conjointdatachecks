@@ -15,4 +15,20 @@ as.data.frame() and plotted using plot().
 
 Additional functions will be added as time allows.
 
-For questions or feedback, please feel free to reach out to carlo.knotz@uis.no.
+You can install the package directly from this GitHub repository with:
+```
+{
+devtools::install_github("https://github.com/cknotz/conjointdatachecks")  
+}
+```
+
+The package includes also a vignette that illustrates how the functions can be used, which can be installed and run with:
+```
+{
+devtools::install_github("https://github.com/cknotz/conjointdatachecks",
+build_vignettes = TRUE)   
+
+vignette("conjointdatachecks")
+}
+```
+For questions or feedback, please feel free to reach out to [carlo.knotz@uis.no](mailto:carlo.knotz@uis.no).
