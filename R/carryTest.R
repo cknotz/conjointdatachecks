@@ -7,6 +7,8 @@
 #' interaction terms. A rejected null indicates carryover effects are present in the case of a particular
 #' vignette attribute (see also Hainmueller et al. 2014, Political Analysis, p. 22).
 #'
+#' Important: This test should only be run on vignette attributes that are unconstrained.
+#'
 #' The result can be plotted (using plot()) or exported as a tidy data.frame
 #' (using as.data.frame()).
 #'
@@ -14,57 +16,62 @@
 #' @param outcome The outcome variable, rating or choice, entered as a string.
 #' @param attributes A character vector of vignette attributes/dimensions.
 #' @param task The task- or contest-ID; should be a factor in the data, entered here as a string.
+#' @param resID The respondent ID; should be a factor in the data, entered here as a string.
 #' @return A list of class 'carryTest'. Can be converted to tidy data.frame with as.data.frame().
 #' @examples
 #' \dontrun{
 #' carryTest(data=experimentdata,
 #' attributes=c("gender","age","income","education"),
 #' outcome="rating",
-#' task="taskID")
+#' task="taskID",
+#' resID="respondent_ID")
 #' }
 #'
-#' @importFrom stats as.formula lm model.frame pf resid
+#' @importFrom stats as.formula lm model.frame pf resid vcov
+#' @importFrom clubSandwich vcovCR Wald_test constrain_zero
 #'
 #' @export
-carryTest <- function(data, outcome, attributes, task) {
+carryTest <- function(data, outcome, attributes, task, resID) {
 
-  # This computes F-tests per vignette attribute
-  res <- as.data.frame(t(invisible(sapply(attributes,function(x){
+  waldres <- as.data.frame(t(invisible(sapply(attributes,function(x){
 
-    # Constructs equation for full model
-    equation <- as.formula(paste(outcome,
+    # Constructs model equation
+    equation <- stats::as.formula(paste(outcome,
                                  paste(
                                    paste(x, task, sep = "*"), collapse = " + "
                                  ),
                                  sep = " ~ "))
 
-    # Runs model & stores info
-    mod <- lm(formula = equation, data = noquote(data))
-    urss <- sum(resid(mod)^2)
-    df_full <- mod$df
+    # Runs model
+    mod <- stats::lm(formula = equation, data = noquote(data))
 
-    # Constructs equation for reduced model
-    equation <- as.formula(paste(outcome,
-                                 paste(x,task,sep = " + "),sep = " ~ "))
+    # Identifies interaction terms
+    terms <- grep(pattern = ":", colnames(stats::vcov(mod)), value = F)
 
-    # Runs reduced model & stores info
-    red <- lm(formula = equation, data = model.frame(mod))
-    rrss <- sum(resid(red)^2)
-    df_red <- red$df
+    #Adjusts VCOV
+    mod_V <- clubSandwich::vcovCR(mod,
+                    cluster = data[[resID]],
+                    type = "CR1S")
 
-    s <- df_red-df_full # restrictions
+    #Runs Wald-test on model results
+    testres <- clubSandwich::Wald_test(mod,
+                         vcov = mod_V,
+                         constraints = clubSandwich::constrain_zero(terms),
+                         test = "Naive-F")
 
-    # F-test
-    fstat <- ((rrss-urss)/s)/(urss/(df_full))
-    fstat
+    rm(mod,mod_V)
 
-    pval <- pf(fstat,s,df_full,lower.tail = F)
+    # Ready for export
+    fstat <- testres$Fstat
+    s <- testres$df_num
+    df_full <- testres$df_denom
+    pval <- testres$p_val
+    rm(testres)
 
     res <- c(fstat,s,df_full,pval)
-  }))))
 
-  # Final output
-  class(res) <- "carryTest"
-  return(res)
+  }))))
+  class(waldres) <- "carryTest"
+  return(waldres)
 }
 

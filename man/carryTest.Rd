@@ -4,7 +4,7 @@
 \alias{carryTest}
 \title{Check conjoint data for carryover effects}
 \usage{
-carryTest(data, outcome, attributes, task)
+carryTest(data, outcome, attributes, task, resID)
 }
 \arguments{
 \item{data}{A data.frame (in long format).}
@@ -14,6 +14,8 @@ carryTest(data, outcome, attributes, task)
 \item{attributes}{A character vector of vignette attributes/dimensions.}
 
 \item{task}{The task- or contest-ID; should be a factor in the data, entered here as a string.}
+
+\item{resID}{The respondent ID; should be a factor in the data, entered here as a string.}
 }
 \value{
 A list of class 'carryTest'. Can be converted to tidy data.frame with as.data.frame().
@@ -27,6 +29,8 @@ interaction terms. A rejected null indicates carryover effects are present in th
 vignette attribute (see also Hainmueller et al. 2014, Political Analysis, p. 22).
 }
 \details{
+Important: This test should only be run on vignette attributes that are unconstrained.
+
 The result can be plotted (using plot()) or exported as a tidy data.frame
 (using as.data.frame()).
 }
@@ -35,7 +39,8 @@ The result can be plotted (using plot()) or exported as a tidy data.frame
 carryTest(data=experimentdata,
 attributes=c("gender","age","income","education"),
 outcome="rating",
-task="taskID")
+task="taskID",
+resID="respondent_ID")
 }
 
 }

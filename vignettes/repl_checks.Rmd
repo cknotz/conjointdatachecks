@@ -1,0 +1,177 @@
+---
+title: "Replication of Hainmueller et al. tests"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+    toc_depth: 3
+    fig_width: 8
+    fig_height: 6
+date: "`r Sys.Date()`"
+author: "Carlo Knotz"
+vignette: >
+  %\VignetteIndexEntry{Replication of Hainmueller et al. tests}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Replicating the Hainmueller et al. data quality checks
+
+To show how the estimations performed by the `carryTest()` function in the `conjointdatachecks` package correspond to the procedure described in the Hainmueller et al. (2014, *Political Analysis*) article, this vignette replicates their tests and illustrates how the `carryTest()` provides equivalent results. In doing so, the vignette also provides a peak under the hood of the `carryTest()` function.
+
+As a first step, we load the relevant packages and the dataset, and perform some data preparation:
+```{r setup, echo = T, results = 'hide'}
+library(conjointdatachecks)
+
+# Loading Hainmueller et al. immigrant experiment data
+data("immigrationconjoint", package = "cjoint")
+immigrationconjoint$contest_no <- factor(immigrationconjoint$contest_no)
+immigrationconjoint$CaseID <- factor(immigrationconjoint$CaseID)
+immigrationconjoint$profile <- factor(immigrationconjoint$profile)
+
+vigdims <- c("Education","Gender","`Country of Origin`",
+             "`Reason for Application`","Job","`Job Experience`",
+             "`Job Plans`","`Prior Entry`","`Language Skills`")
+
+```
+
+### Testing for carryover effects: Hainmueller et al. results
+
+Hainmueller et al. (p. 22) report that they test for carryover effects by testing if the effect of "using an interpreter" (one of the categories of the "Language Skills" vignette attribute) differs across the different rating tasks. They state that they estimate a model that includes the "Language skills" attribute, an indicator for the rating task, and an interaction between the two, and then run an F-test to see if the interaction terms are jointly significant. 
+
+A look at their Stata replication code reveals that they also include the other vignette attributes plus some interactions between them:
+```
+*test if language effects are significantly different across tasks
+reg Chosen_Immigrant i.FeatGender i.FeatEd##i.FeatJob i.FeatLang##i.contest_no ///
+                       ib6.FeatCountry##i.FeatReason i.FeatExp ib3.FeatPlans i.FeatTrips ///
+					   ,  cl(CaseID)
+
+[...]
+
+*joint test
+test 4.FeatLang#2.contest_no 4.FeatLang#3.contest_no 4.FeatLang#3.contest_no ///
+     4.FeatLang#4.contest_no 4.FeatLang#5.contest_no
+					   
+```
+
+They report that the F-test produces a *p*-value of around 0.52.
+
+To replicate this in `R`, we run an equivalent estimation and then use the `clubSandwich` package to cluster the standard errors and perform the joint hypothesis test. The test result corresponds to the one reported by Hainmueller et al.:
+```{r carryrep}
+carrymod <- lm(Chosen_Immigrant ~ Gender + Education*Job +
+                 `Country of Origin`*`Reason for Application` +
+                 `Job Experience` + `Job Plans` + `Prior Entry` +
+                 `Language Skills`*contest_no,
+               data = immigrationconjoint)
+
+carryvcov <- clubSandwich::vcovCR(carrymod,
+                                  cluster = immigrationconjoint$CaseID,
+                                  type = "CR1S")
+
+clubSandwich::Wald_test(carrymod,
+                        constraints = clubSandwich::constrain_zero("used interpreter:contest_no", 
+                                                                   reg_ex = T),
+                        vcov = carryvcov,
+                        test = "Naive-F")
+```
+
+### Carryover effects: Single attributes
+
+Due to the randomization of vignettes in conjoint experiments, the effects of single attributes should be independent of whether other attributes are included in the model -- as long as there no excluded combinations of vignette attributes.
+
+Thus, it should also be possible to test for carryover effects in the case of a particular attribute, and also to consider effect differences for all of the attribute levels, as shown below:
+```{r carrysing}
+carrymod <- lm(Chosen_Immigrant ~ `Language Skills`*contest_no,
+               data = immigrationconjoint)
+
+carryvcov <- clubSandwich::vcovCR(carrymod,
+                                  cluster = immigrationconjoint$CaseID,
+                                  type = "CR1S")
+
+clubSandwich::Wald_test(carrymod,
+                        constraints = clubSandwich::constrain_zero(":", 
+                                                                   reg_ex = T),
+                        vcov = carryvcov,
+                        test = "Naive-F")
+
+```
+
+The F-test *p*-value here is slightly different, but the conclusion is obviously the same: There are no signs of carryover effects.
+
+The `carryTest()` function relies on the code above and thus produces the same result:
+```{r carryTest}
+carryTest(data = immigrationconjoint,
+          outcome = "Chosen_Immigrant",
+          attributes = "`Language Skills`",
+          task = "contest_no",
+          resID = "CaseID")
+```
+
+### Testing for profile order effects: Hainmueller et al. results
+
+Equivalent to their previous test, Hainmueller et al. test for profile order effects in the case of the "used interpreter" level of the "Language skills" attribute. They fail to reject the Null with a *p*-value of around 0.48:
+```
+*test if language effects are significantly different across profiles
+reg Chosen_Immigrant i.FeatGender i.FeatEd##i.FeatJob i.FeatLang##i.profile ///
+                       ib6.FeatCountry##i.FeatReason i.FeatExp ib3.FeatPlans i.FeatTrips ///
+					   ,  cl(CaseID) 			
+
+[...]
+                       
+*joint test
+test 4.FeatLang#2.profile
+```
+
+The replication in `R` looks as follows:
+```{r proforder}
+ordmod <- lm(Chosen_Immigrant ~ Gender + Education*Job +
+                           `Country of Origin`*`Reason for Application` +
+                           `Job Experience` + `Job Plans` + `Prior Entry` +
+                           `Language Skills`*profile,
+                         data = immigrationconjoint)
+
+ordvcov <- clubSandwich::vcovCR(ordmod,
+                                  cluster = immigrationconjoint$CaseID,
+                                  type = "CR1S")
+
+clubSandwich::Wald_test(ordmod,
+                        constraints = clubSandwich::constrain_zero("used interpreter:", 
+                                                                   reg_ex = T),
+                        vcov = ordvcov,
+                        test = "Naive-F")
+```
+
+### Profile order effects: Single attributes
+
+Estimating this test again with a reduced regression model but all attribute levels produces a different but equivalent result:
+```{r profsing}
+ordmod <- lm(Chosen_Immigrant ~ `Language Skills`*profile,
+                         data = immigrationconjoint)
+
+ordvcov <- clubSandwich::vcovCR(ordmod,
+                                  cluster = immigrationconjoint$CaseID,
+                                  type = "CR1S")
+
+clubSandwich::Wald_test(ordmod,
+                        constraints = clubSandwich::constrain_zero(":", 
+                                                                   reg_ex = T),
+                        vcov = ordvcov,
+                        test = "Naive-F")
+
+```
+
+The result is again identical when using the `carryTest()` function:
+```{r profsing_pack}
+carryTest(data = immigrationconjoint,
+                              outcome = "Chosen_Immigrant",
+                              attributes = "`Language Skills`",
+                              task = "profile",
+                              resID = "CaseID")
+
+```

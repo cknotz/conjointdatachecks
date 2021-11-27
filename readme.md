@@ -1,6 +1,6 @@
 # conjointdatachecks
 
-This is an R package that contains two (so far) lightweight functions to check
+This is an R package -- in development -- that contains two (so far) lightweight functions to check
 the quality of data from conjoint survey experiments.
 
 One function, `carryTest()`, checks the data for carryover effects using the
@@ -23,9 +23,14 @@ devtools::install_github("https://github.com/cknotz/conjointdatachecks")
 
 The package includes also a vignette that illustrates how the functions can be used, which can be installed and run with:
 ```
+if(!require(cjoint)){ # to be able to use immigration data
+  install.packages("cjoint")
+}
+
 devtools::install_github("https://github.com/cknotz/conjointdatachecks",
 build_vignettes = TRUE)   
 
 vignette("conjointdatachecks")
 ```
+
 For questions or feedback, please feel free to reach out to [carlo.knotz@uis.no](mailto:carlo.knotz@uis.no).

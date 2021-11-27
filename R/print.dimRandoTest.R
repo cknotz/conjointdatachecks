@@ -107,6 +107,7 @@ print.dimRandoTest <- function(x,...){
       # Create output table
       frame <- rbind(sep,frame,sep)
 
+      cat("\n")
       cat(paste0(" Test for randomization across respondents (using ",respvar,")\n"))
       cat("",sep,"\n")
       print(frame, row.names=F,right=F)
