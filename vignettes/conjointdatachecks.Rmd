@@ -92,7 +92,7 @@ carryTest(data = immigration,
 
 ```
 
-Here we test for carryover effects looking only at one particular vignette attribute, the fictional immigrant's language skills. As Hainmueller et al., the finding is that no carryover effects are present, but the *p*-value is slightly different (.48 instead of .52). This is due to a different model and test specification, and is explained in more detail in the [replication vignette](repl_checks.html).
+Here we test for carryover effects looking only at one particular vignette attribute, the fictional immigrant's language skills. As Hainmueller et al., the finding is that no carryover effects are present, but the *p*-value is slightly different (.48 instead of .52). This is due to a different model and test specification, and is shown in more detail in the [replication vignette](repl_checks.html).
 
 To run the test over all vignette attributes, we simply refer to the `vigdims` vector created above:
 ```{r carrytest_all}

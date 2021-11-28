@@ -8,6 +8,7 @@
 #' vignette attribute (see also Hainmueller et al. 2014, Political Analysis, p. 22).
 #'
 #' Important: This test should only be run on vignette attributes that are unconstrained.
+#' Please see the package vignettes (browseVignettes("conjointdatachecks")) for details.
 #'
 #' The result can be plotted (using plot()) or exported as a tidy data.frame
 #' (using as.data.frame()).
