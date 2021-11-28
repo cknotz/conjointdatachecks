@@ -29,15 +29,20 @@ As a first step, we load the relevant packages and the dataset, and perform some
 ```{r setup, echo = T, results = 'hide'}
 library(conjointdatachecks)
 
-# Loading Hainmueller et al. immigrant experiment data
-data("immigrationconjoint", package = "cjoint")
-immigrationconjoint$contest_no <- factor(immigrationconjoint$contest_no)
-immigrationconjoint$CaseID <- factor(immigrationconjoint$CaseID)
-immigrationconjoint$profile <- factor(immigrationconjoint$profile)
+# Loading Hainmueller et al. immigrant experiment data (from cregg GitHub)
+utils::download.file("https://github.com/leeper/cregg/raw/main/data/immigration.rda",
+              "immigration")
+load("immigration")
 
-vigdims <- c("Education","Gender","`Country of Origin`",
-             "`Reason for Application`","Job","`Job Experience`",
-             "`Job Plans`","`Prior Entry`","`Language Skills`")
+# Convert ID vars to factors
+immigration$contest_no <- factor(immigration$contest_no)
+immigration$CaseID <- factor(immigration$CaseID)
+immigration$profile <- factor(immigration$profile)
+
+
+# Select vignette attributes ("dimensions")
+vigdims <- c("Gender","JobExperience",
+             "JobPlans","PriorEntry","LanguageSkills")
 
 ```
 
@@ -64,34 +69,34 @@ They report that the F-test produces a *p*-value of around 0.52.
 
 To replicate this in `R`, we run an equivalent estimation and then use the `clubSandwich` package to cluster the standard errors and perform the joint hypothesis test. The test result corresponds to the one reported by Hainmueller et al.:
 ```{r carryrep}
-carrymod <- lm(Chosen_Immigrant ~ Gender + Education*Job +
-                 `Country of Origin`*`Reason for Application` +
-                 `Job Experience` + `Job Plans` + `Prior Entry` +
-                 `Language Skills`*contest_no,
-               data = immigrationconjoint)
+carrymod <- lm(ChosenImmigrant~contest_no*LanguageSkills +
+                 Gender + Education*Job + CountryOfOrigin*ReasonForApplication +
+                 JobExperience + JobPlans + PriorEntry,
+               data = immigration)
 
-carryvcov <- clubSandwich::vcovCR(carrymod,
-                                  cluster = immigrationconjoint$CaseID,
-                                  type = "CR1S")
+carrymod_vc <- clubSandwich::vcovCR(carrymod,
+                      cluster = immigration$CaseID,
+                      type = "CR1S")
 
 clubSandwich::Wald_test(carrymod,
-                        constraints = clubSandwich::constrain_zero("used interpreter:contest_no", 
-                                                                   reg_ex = T),
-                        vcov = carryvcov,
-                        test = "Naive-F")
+          constraints = clubSandwich::constrain_zero(":LanguageSkillsUsed Interpreter",
+                                       coefs = coef(carrymod),
+                                       reg_ex = T),
+          vcov = carrymod_vc,
+          test = "Naive-F")
 ```
 
 ### Carryover effects: Single attributes
 
-Due to the randomization of vignettes in conjoint experiments, the effects of single attributes should be independent of whether other attributes are included in the model -- as long as there no excluded combinations of vignette attributes.
+Due to the randomization of vignettes in conjoint experiments, the effects of single attributes should be independent of whether other attributes are included in the model -- as long as there no excluded combinations of vignette attributes!
 
-Thus, it should also be possible to test for carryover effects in the case of a particular attribute, and also to consider effect differences for all of the attribute levels, as shown below:
+Thus, it should also be possible to test for carryover effects in the case of a particular attribute, and also to consider effect differences for all of the respective attribute's levels in the test, as shown below:
 ```{r carrysing}
-carrymod <- lm(Chosen_Immigrant ~ `Language Skills`*contest_no,
-               data = immigrationconjoint)
+carrymod <- lm(ChosenImmigrant ~ LanguageSkills*contest_no,
+               data = immigration)
 
 carryvcov <- clubSandwich::vcovCR(carrymod,
-                                  cluster = immigrationconjoint$CaseID,
+                                  cluster = immigration$CaseID,
                                   type = "CR1S")
 
 clubSandwich::Wald_test(carrymod,
@@ -104,11 +109,11 @@ clubSandwich::Wald_test(carrymod,
 
 The F-test *p*-value here is slightly different, but the conclusion is obviously the same: There are no signs of carryover effects.
 
-The `carryTest()` function relies on the code above and thus produces the same result:
+The `carryTest()` function runs, in essence, the code above and thus produces the same result:
 ```{r carryTest}
-carryTest(data = immigrationconjoint,
-          outcome = "Chosen_Immigrant",
-          attributes = "`Language Skills`",
+carryTest(data = immigration,
+          outcome = "ChosenImmigrant",
+          attributes = "LanguageSkills",
           task = "contest_no",
           resID = "CaseID")
 ```
@@ -130,32 +135,33 @@ test 4.FeatLang#2.profile
 
 The replication in `R` looks as follows:
 ```{r proforder}
-ordmod <- lm(Chosen_Immigrant ~ Gender + Education*Job +
-                           `Country of Origin`*`Reason for Application` +
-                           `Job Experience` + `Job Plans` + `Prior Entry` +
-                           `Language Skills`*profile,
-                         data = immigrationconjoint)
+profmod <- lm(ChosenImmigrant~profile*LanguageSkills +
+                Gender + Education*Job + CountryOfOrigin*ReasonForApplication +
+                JobExperience + JobPlans + PriorEntry,
+              data = immigration)
 
-ordvcov <- clubSandwich::vcovCR(ordmod,
-                                  cluster = immigrationconjoint$CaseID,
-                                  type = "CR1S")
+profmod_vc <- clubSandwich::vcovCR(profmod,
+                      cluster = immigration$CaseID,
+                      type = "CR1S")
 
-clubSandwich::Wald_test(ordmod,
-                        constraints = clubSandwich::constrain_zero("used interpreter:", 
-                                                                   reg_ex = T),
-                        vcov = ordvcov,
-                        test = "Naive-F")
+
+clubSandwich::Wald_test(profmod,
+          constraints = clubSandwich::constrain_zero(":LanguageSkillsUsed Interpreter",
+                                       coefs = coef(profmod),
+                                       reg_ex = T),
+          vcov = profmod_vc,
+          test = "Naive-F")
 ```
 
 ### Profile order effects: Single attributes
 
-Estimating this test again with a reduced regression model but all attribute levels produces a different but equivalent result:
+Estimating this test again with a reduced regression model but all attribute levels produces a different result, but the conclusion remains the same: no profile order effects:
 ```{r profsing}
-ordmod <- lm(Chosen_Immigrant ~ `Language Skills`*profile,
-                         data = immigrationconjoint)
+ordmod <- lm(ChosenImmigrant ~ LanguageSkills*profile,
+                         data = immigration)
 
 ordvcov <- clubSandwich::vcovCR(ordmod,
-                                  cluster = immigrationconjoint$CaseID,
+                                  cluster = immigration$CaseID,
                                   type = "CR1S")
 
 clubSandwich::Wald_test(ordmod,
@@ -168,10 +174,10 @@ clubSandwich::Wald_test(ordmod,
 
 The result is again identical when using the `carryTest()` function:
 ```{r profsing_pack}
-carryTest(data = immigrationconjoint,
-                              outcome = "Chosen_Immigrant",
-                              attributes = "`Language Skills`",
-                              task = "profile",
-                              resID = "CaseID")
+carryTest(data = immigration,
+          outcome = "ChosenImmigrant",
+          attributes = "LanguageSkills",
+          task = "profile",
+          resID = "CaseID")
 
 ```

@@ -23,10 +23,6 @@ devtools::install_github("https://github.com/cknotz/conjointdatachecks")
 
 The package includes also a vignette that illustrates how the functions can be used, which can be installed and run with:
 ```
-if(!require(cjoint)){ # to be able to use immigration data
-  install.packages("cjoint")
-}
-
 devtools::install_github("https://github.com/cknotz/conjointdatachecks",
 build_vignettes = TRUE)   
 

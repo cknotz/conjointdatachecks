@@ -63,14 +63,20 @@ The code chunk below then loads the `conjointdatachecks` package and the dataset
 ```{r setup, echo = T, results = 'hide'}
 library(conjointdatachecks)
 
-# Loading Hainmueller et al. immigrant experiment data
-data("immigrationconjoint", package = "cjoint")
-immigrationconjoint$contest_no <- factor(immigrationconjoint$contest_no)
-immigrationconjoint$CaseID <- factor(immigrationconjoint$CaseID)
-immigrationconjoint$profile <- factor(immigrationconjoint$profile)
+# Loading Hainmueller et al. immigrant experiment data (from cregg GitHub)
+utils::download.file("https://github.com/leeper/cregg/raw/main/data/immigration.rda",
+              "immigration")
+load("immigration")
 
-vigdims <- c("Gender","`Job Experience`",
-             "`Job Plans`","`Prior Entry`","`Language Skills`")
+# Convert ID vars to factors
+immigration$contest_no <- factor(immigration$contest_no)
+immigration$CaseID <- factor(immigration$CaseID)
+immigration$profile <- factor(immigration$profile)
+
+
+# Select vignette attributes ("dimensions")
+vigdims <- c("Gender","JobExperience",
+             "JobPlans","PriorEntry","LanguageSkills")
 
 ```
 
@@ -78,9 +84,9 @@ vigdims <- c("Gender","`Job Experience`",
 
 The `carryTest()` function can be used as shown below:
 ```{r carrytest}
-carryTest(data = immigrationconjoint,
-          outcome = "Chosen_Immigrant",
-          attributes = "`Language Skills`",
+carryTest(data = immigration,
+          outcome = "ChosenImmigrant",
+          attributes = "LanguageSkills",
           task = "contest_no",
           resID = "CaseID")
 
@@ -90,8 +96,8 @@ Here we test for carryover effects looking only at one particular vignette attri
 
 To run the test over all vignette attributes, we simply refer to the `vigdims` vector created above:
 ```{r carrytest_all}
-carry <- carryTest(data = immigrationconjoint,
-          outcome = "Chosen_Immigrant",
+carry <- carryTest(data = immigration,
+          outcome = "ChosenImmigrant",
           attributes = vigdims,
           task = "contest_no",
           resID = "CaseID")
@@ -121,10 +127,10 @@ as.data.frame(carry)
 
 Since a test for profile order effects also involves a linear hypothesis F-test, the `carryTest` function can also be used to test for profile order effects. To do so, we simply replace the task-ID by an indicator for the profile position:
 ```{r proftest}
-carryTest(data = immigrationconjoint,
-                              outcome = "Chosen_Immigrant",
+carryTest(data = immigration,
+                              outcome = "ChosenImmigrant",
                               attributes = vigdims,
-                              task = "profile", # <- replace here
+                              task = "profile", # <- replaced here
                               resID = "CaseID")
 ```
 
@@ -138,7 +144,7 @@ Since survey experiments are nowadays often administered online and the random a
 
 If we are working with a metric respondent-level variable -- e.g., the ethnocentrism measure in the Hainmueller et al. experiment -- we declare this in the call to `dimRandoTest()` as shown below:
 ```{r dimrando}
-result <- dimRandoTest(data = immigrationconjoint,
+result <- dimRandoTest(data = immigration,
                         attributes = vigdims, # we use the same vignette attr. as before
                         resvar = "ethnocentrism",
                         vartype = "metric")
@@ -153,10 +159,10 @@ To illustrate how `dimRandoTest()` works with a categorical respondent-level var
 ```{r dimrando_bin}
 
 # Split ethnocentrism (by median, following Hainmueller/Hopkins 2015)
-immigrationconjoint$ethno_bin <- factor(ifelse(immigrationconjoint$ethnocentrism>median(immigrationconjoint$ethnocentrism, na.rm = T),
+immigration$ethno_bin <- factor(ifelse(immigration$ethnocentrism>median(immigration$ethnocentrism, na.rm = T),
                                         "High","Low"))
 
-dimRandoTest(data = immigrationconjoint,
+dimRandoTest(data = immigration,
                         attributes = vigdims, # we use the same vignette attr. as before
                         resvar = "ethno_bin",
                         vartype = "categorical")
@@ -169,7 +175,7 @@ The result is the same as before: We find no randomization problems.
 As in the case of `carryTest()`, the results from `dimRandoTest()` can be quickly plotted:
 ```{r dimrandoplot}
 
-result <- dimRandoTest(data = immigrationconjoint,
+result <- dimRandoTest(data = immigration,
                         attributes = vigdims, # we use the same vignette attr. as before
                         resvar = "ethno_bin",
                         vartype = "categorical")
