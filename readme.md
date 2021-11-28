@@ -1,6 +1,6 @@
 # conjointdatachecks
 
-This is an R package -- in development -- that contains two (so far) lightweight functions to check
+This is an R package that contains two (so far) lightweight functions to check
 the quality of data from conjoint survey experiments.
 
 One function, `carryTest()`, checks the data for carryover effects using the
