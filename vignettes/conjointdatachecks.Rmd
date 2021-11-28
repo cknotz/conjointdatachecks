@@ -32,7 +32,7 @@ functions to check the quality of data from conjoint experiments. One data quali
 
 However, often users also want to do formal statistical tests (or journal reviewers demand them). Hainmueller et al. (2014) describe procedures to conduct such formal tests, but these have -- to my knowledge -- not yet conveniently implemented in a package. Experienced users should of course not have any issues with running these tests themselves, but some others might.
 
-_This package provides two functions to quickly implement tests for carryover effects and randomization problems as well as methods for quick plotting and tidy exporting of the results_.
+_This package provides two functions to quickly implement tests for carryover effects and randomization problems as well as methods for plotting and tidy exporting of the results_.
 
 ## Functions in `conjointdatachecks`
 
@@ -43,7 +43,7 @@ This package includes two functions so far (more will be added as time allows):
 
 `carryTest()` in essence implements the procedure described by Hainmueller et al. (2019, 22): It estimates linear regression models (with cluster-robust standard errors, clustering by respondent) including one vignette attribute/dimension at a time interacted with an ID for the task number as predictors and then estimates an F-test to test for the joint significance of the interaction terms. A rejected null indicates carryover effects are present in the case of a particular vignette attribute. This function relies on the [`clubSandwich` package](https://cran.r-project.org/web/packages/clubSandwich/vignettes/Wald-tests-in-clubSandwich.html#testing-an-interaction).
 
-**Important**: The `carryTest()` function should not be used on vignette attributes that are constrained by some other vignette attributes (where illogical combinations of attributes were excluded in the experimental design). Since `carryTest()` includes only one attribute at a time, it cannot account for attribute effects that depend on the values of other attributes.
+**Important**: The `carryTest()` function should not be used on vignette attributes that are constrained by some other vignette attributes (where some combinations of attributes were excluded in the experimental design). Since `carryTest()` includes only one attribute at a time, it cannot account for attribute effects that depend on the values of other attributes.
 
 `dimRandoTest()` tests if there are significant bivariate associations between a set of vignette attributes and a chosen respondent variable. The test differs depending on whether the respondent variable is metric or categorical. If the variable is metric, (e.g., income), the function runs a one-way ANOVA with the respondent-level variable as the dependent and each individual vignette attribute in a chosen set as the independent variable and compiles the results in a table. If the respondent-level variable is categorical (e.g., gender), the function cross-tabulates each vignette attribute with the respondent-level variable, computes a chi-squared test, and compiles the results in a table.
 
@@ -140,7 +140,7 @@ Here we find significant effects in the cases of the "Gender" attribute. Looking
 
 Since survey experiments are nowadays often administered online and the random assignment of experimental conditions is left to computers, randomization problems are not that likely to happen. Still, it can be important to check -- for example, where a survey and the experiment(s) included in it are administered not by researchers themselves but by external providers, researchers might want to run a quick initial check on the data to be able refuse (and avoid paying for!) problematic data.
 
-`dimRandoTest()` makes it possible to do this quickly with data from conjoint experiments. The function runs fairly simple statistical tests for bivariate associations between a chosen respondent-level variable and a set of vignette attributes. The tests are fairly basic: If the respondent-level variable is metric, an ANOVA is estimated. If the respondent-level variable is categorical, the function uses a chi-squared test. In the latter case, the function will also add a note if there are cases where a chi-squared test is run and the minimum expected frequency of any cell in the corresponding contingency table is less than 5.
+`dimRandoTest()` makes it possible to do this quickly with data from conjoint experiments. The function runs fairly simple statistical tests for bivariate associations between a chosen respondent-level variable and a set of vignette attributes. The tests are as follows: If the respondent-level variable is metric, an ANOVA is estimated. If the respondent-level variable is categorical, the function uses a chi-squared test. In the latter case, the function will also add a note if there are cases where a chi-squared test is run and the minimum expected frequency of any cell in the corresponding contingency table is less than 5.
 
 If we are working with a metric respondent-level variable -- e.g., the ethnocentrism measure in the Hainmueller et al. experiment -- we declare this in the call to `dimRandoTest()` as shown below:
 ```{r dimrando}

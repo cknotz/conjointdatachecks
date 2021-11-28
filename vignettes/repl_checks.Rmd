@@ -50,7 +50,7 @@ vigdims <- c("Gender","JobExperience",
 
 Hainmueller et al. (p. 22) report that they test for carryover effects by testing if the effect of "using an interpreter" (one of the categories of the "Language Skills" vignette attribute) differs across the different rating tasks. They state that they estimate a model that includes the "Language skills" attribute, an indicator for the rating task, and an interaction between the two, and then run an F-test to see if the interaction terms are jointly significant. 
 
-A look at their Stata replication code reveals that they also include the other vignette attributes plus some interactions between them:
+A look at their Stata replication code shows that they also include the other vignette attributes plus some interactions between them (to account for excluded combinations of some attributes):
 ```
 *test if language effects are significantly different across tasks
 reg Chosen_Immigrant i.FeatGender i.FeatEd##i.FeatJob i.FeatLang##i.contest_no ///
@@ -88,9 +88,9 @@ clubSandwich::Wald_test(carrymod,
 
 ### Carryover effects: Single attributes
 
-Due to the randomization of vignettes in conjoint experiments, the effects of single attributes should be independent of whether other attributes are included in the model -- as long as there no excluded combinations of vignette attributes!
+Due to the randomization of vignettes in conjoint experiments, the effects of a single attribute should be independent of whether predictors for other attributes also are included in the model -- as long as this attribute in question is not linked to other attributes via excluded combinations, of course!
 
-Thus, it should also be possible to test for carryover effects in the case of a particular attribute, and also to consider effect differences for all of the respective attribute's levels in the test, as shown below:
+Thus, it should also be possible to test for carryover effects in the case of a particular attribute, and then also to consider effect differences for all of the respective attribute's levels simultaneously in the test, as shown below:
 ```{r carrysing}
 carrymod <- lm(ChosenImmigrant ~ LanguageSkills*contest_no,
                data = immigration)
