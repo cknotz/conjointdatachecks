@@ -165,7 +165,7 @@ To illustrate how `dimRandoTest()` works with a categorical respondent-level var
 immigration$ethno_bin <- factor(ifelse(immigration$ethnocentrism>median(immigration$ethnocentrism, na.rm = T),
                                         "High","Low"))
 
-dimRandoTest(data = immigration,
+dimRandoTest(data = immigration[which(immigration$contest_no==1),],
                         attributes = vigdims, # we use the same vignette attr. as before
                         resvar = "ethno_bin",
                         vartype = "categorical")
