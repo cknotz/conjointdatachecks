@@ -52,12 +52,12 @@ The result can be plotted (using plot()) or exported as a tidy data.frame
 }
 \examples{
 \dontrun{
-dimRandoTest(data=experimentdata[experimentdata$round==1],
+dimRandoTest(data=experimentdata[which(experimentdata$round==1),],
 attributes=c("age","nationality","gender"),
 resvar = "respondent_gender",
 vartype = "categorical")
 
-dimRandoTest(data=experimentdata[experimentdata$round==1],
+dimRandoTest(data=experimentdata[which(experimentdata$round==1),],
 attributes=c("age","nationality","gender"),
 resvar = "respondent_income",
 vartype = "metric")
