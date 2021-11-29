@@ -19,12 +19,12 @@ print.dimRandoTest <- function(x,...){
     frame$V1 <- NULL # vartype is known
     frame$V4 <- as.integer(frame$V4)
     frame$Significance <- rep(" ", length(frame$V2))
-    frame$Significance <- ifelse(frame$V5<0.1,"*",frame$Significance)
-    frame$Significance <- ifelse(frame$V5<0.05,"**",frame$Significance)
-    frame$Significance <- ifelse(frame$V5<0.01,"***",frame$Significance)
-    frame$V5 <- format.pval(as.numeric(frame$V5), justify="right",
+    frame$Significance <- ifelse(frame$V6<0.1,"*",frame$Significance)
+    frame$Significance <- ifelse(frame$V6<0.05,"**",frame$Significance)
+    frame$Significance <- ifelse(frame$V6<0.01,"***",frame$Significance)
+    frame$V5 <- format.pval(as.numeric(frame$V6), justify="right",
                             digits = 3, eps = 0.001)
-    frame$V6 <- format(round(as.numeric(frame$V6), digits = 3),nsmall=3)
+    frame$V6 <- format(round(as.numeric(frame$V5), digits = 3),nsmall=3)
 
     # Extract respondent var:
     respvar <- unique(frame$V2)

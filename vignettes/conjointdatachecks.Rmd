@@ -142,9 +142,12 @@ Since survey experiments are nowadays often administered online and the random a
 
 `dimRandoTest()` makes it possible to do this quickly with data from conjoint experiments. The function runs fairly simple statistical tests for bivariate associations between a chosen respondent-level variable and a set of vignette attributes. The tests are as follows: If the respondent-level variable is metric, an ANOVA is estimated. If the respondent-level variable is categorical, the function uses a chi-squared test. In the latter case, the function will also add a note if there are cases where a chi-squared test is run and the minimum expected frequency of any cell in the corresponding contingency table is less than 5.
 
+**Important**: The estimations do not take into account if the data are clustered. If the experiment involved multiple rounds of rating or choice tasks per respondents, the test should be run one round at a time.
+
 If we are working with a metric respondent-level variable -- e.g., the ethnocentrism measure in the Hainmueller et al. experiment -- we declare this in the call to `dimRandoTest()` as shown below:
 ```{r dimrando}
-result <- dimRandoTest(data = immigration,
+
+result <- dimRandoTest(data = immigration[which(immigration$contest_no==1),],
                         attributes = vigdims, # we use the same vignette attr. as before
                         resvar = "ethnocentrism",
                         vartype = "metric")
@@ -175,7 +178,7 @@ The result is the same as before: We find no randomization problems.
 As in the case of `carryTest()`, the results from `dimRandoTest()` can be quickly plotted:
 ```{r dimrandoplot}
 
-result <- dimRandoTest(data = immigration,
+result <- dimRandoTest(data = immigration[which(immigration$contest_no==1),],
                         attributes = vigdims, # we use the same vignette attr. as before
                         resvar = "ethno_bin",
                         vartype = "categorical")

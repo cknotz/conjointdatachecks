@@ -38,6 +38,9 @@ vignette attribute as the independent variable and compiles the results.
 Users need to specify whether their respondent-level variable is metric or
 categorical.
 
+Important: If the experiment involved multiple rating or choice rounds per respondent,
+then the tests should be run separately for each round.
+
 In both cases, a rejected null (small p-value) indicates
 that there is some statistically significant association between a given
 profile attribute and the respondent variable, which in turn signals that
@@ -49,12 +52,12 @@ The result can be plotted (using plot()) or exported as a tidy data.frame
 }
 \examples{
 \dontrun{
-dimRandoTest(data=experimentdata,
+dimRandoTest(data=experimentdata[experimentdata$round==1],
 attributes=c("age","nationality","gender"),
 resvar = "respondent_gender",
 vartype = "categorical")
 
-dimRandoTest(data=experimentdata,
+dimRandoTest(data=experimentdata[experimentdata$round==1],
 attributes=c("age","nationality","gender"),
 resvar = "respondent_income",
 vartype = "metric")
